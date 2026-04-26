@@ -22,6 +22,7 @@ type Lesson struct {
 	TeacherName          string     `json:"teacher_name"`
 	Description          string     `json:"description"`
 	RegistrationDeadline *time.Time `json:"registration_deadline,omitempty"`
+	IsCanceled           bool       `json:"is_cancelled"`
 }
 
 // IsRegistrationOpen returns true if students can still register.
@@ -266,4 +267,18 @@ func (d *DB) ListLessonPreviousTaskRecords(lesson *Lesson) ([]*TaskRecord, error
 	}
 	SortTaskRecordsOldestFirst(result)
 	return result, nil
+}
+
+func (d *DB) CancelLesson(lessonID LessonID) error {
+	return d.db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket(d.bucketName)
+		lesson, err := getValue[Lesson](b, lessonID)
+		if err != nil {
+			return err
+		}
+		now := time.Now()
+		lesson.RegistrationDeadline = &now
+		lesson.IsCanceled = true
+		return setValue(b, lessonID, *lesson)
+	})
 }
