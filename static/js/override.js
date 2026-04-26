@@ -34,6 +34,11 @@ document.addEventListener("click", function (e) {
     document.getElementById(btn.getAttribute("data-form")).submit();
   }
 
+  if (action === "cancel") {
+    if (!confirm("Cancel lesson?")) return;
+    document.getElementById(btn.getAttribute("data-form")).submit();
+  }
+
   if (action === "open-all") {
     var d = document.querySelectorAll(btn.getAttribute("data-target"));
     var s = ![].slice.call(d).every(function (x) { return x.open; });

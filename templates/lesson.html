@@ -64,6 +64,16 @@
         {{ end }}
         {{ end }}
       </div>
+      <div class="text-gray-400">
+        Status:
+      </div>
+      <div>
+        {{ if .Lesson.IsCanceled }}
+        <span class="text-red-400">canceled</span>
+      {{ else }}
+        <span class="text-gray-400">active</span>
+        {{ end }}
+      </div>
     </div>
     <div class="text-xs markdown pt-4">
       {{.Lesson.Description | markdown}}
@@ -139,6 +149,17 @@
       </button>
       <form id="revoke-all-form"
             action="/api/lesson/{{.Lesson.ID}}/unregister-all"
+            method="post"
+            class="hidden">
+      </form>
+      <button class="text-red-400 hover:text-red-300 text-xs ml-2"
+              type="button"
+              data-action="cancel"
+              data-form="cancel-form">
+        [cancel lesson]
+      </button>
+      <form id="cancel-form"
+            action="/api/lesson/{{.Lesson.ID}}/cancel"
             method="post"
             class="hidden">
       </form>
