@@ -569,6 +569,32 @@ func UnregisterFromLessonHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/user/"+user.ID+"/task/"+taskID, http.StatusSeeOther)
 }
 
+func CancelLessonHandler(w http.ResponseWriter, r *http.Request) {
+	user := teacherSession(w, r)
+	if user == nil {
+		return
+	}
+
+	lessonID := mux.Vars(r)["lessonID"]
+
+	if err := DB.CancelLesson(storage.LessonID(lessonID)); err != nil {
+		log.Printf("action=cancel_lesson user=%s lesson=%s error=%v", user.ID, lessonID, err)
+		http.Error(w, "Failed to cancel lesson: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	count, err := DB.UnregisterAllFromLesson(storage.LessonID(lessonID))
+	if err != nil {
+		log.Printf("action=cancel_lesson user=%s lesson=%s error=%v", user.ID, lessonID, err)
+		http.Error(w, "Failed to revoke registrations: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	log.Printf("action=cancel_lesson user=%s lesson=%s count=%d", user.ID, lessonID, count)
+	analytics.Track(user.ID, "lesson_cancel", map[string]any{"lesson_id": lessonID, "count": count})
+	http.Redirect(w, r, "/lesson/"+lessonID, http.StatusSeeOther)
+}
+
 func reverseSlice(s []storage.TaskRecord) []storage.TaskRecord {
 	c := slices.Clone(s)
 	slices.Reverse(c)
