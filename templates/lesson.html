@@ -140,7 +140,7 @@
   <div class="text-xs text-gray-500 mb-2 flex items-center justify-between">
     <span>
       // registered tasks ({{ len .TaskRecords }})
-      {{ if .SessionIsTeacher }}
+      {{ if and .SessionIsTeacher (not .Lesson.IsCanceled) }}
       <button class="text-red-400 hover:text-red-300 text-xs ml-2"
               type="button"
               data-action="revoke-all"
